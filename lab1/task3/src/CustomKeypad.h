@@ -7,6 +7,7 @@
 class CustomKeypad
 {
     private:
+        char greenLedCode[4] = {'2', '4', '6', '8'};
         const byte rows = 4;
         const byte cols = 4;
         char hexKeys[4][4] = {
@@ -19,6 +20,7 @@ class CustomKeypad
     public:
         CustomKeypad();
         Keypad customKey();
+        bool checkCode(char arr[]);
 };
 
 #endif

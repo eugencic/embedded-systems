@@ -23,3 +23,27 @@ void Led::switchLight(bool ledState)
       digitalWrite(ledPin, LOW);
     }
 }
+
+void Led::switchLightTimer() 
+{
+  digitalWrite(ledPin, HIGH);
+  delay(3000);
+  digitalWrite(ledPin, LOW);
+}
+
+bool Led::getLedState() 
+{
+  if (ledState == false) 
+  {
+      return false;
+  } 
+  else 
+  {
+    return true;
+  }
+}
+
+void Led::setLedState(bool state) 
+{
+  ledState = state;
+}

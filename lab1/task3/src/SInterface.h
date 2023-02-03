@@ -8,20 +8,20 @@ class SerialInterface
 {
     private:
         byte ledState;
-        String startOutput = "Hello! This is task 2";
-        String askOutput = "Type 'turn on' to turn on the led, or 'turn off' to turn it off";
+        String startOutput = "Hello! This is task 3";
+        String askOutput = "Type the secret code";
         String waitOutput = "Waiting for a command: ";
         int charsRead;
         char input[20];
         String turnOnMessage = "turn on";
-        String receivedTurnOn = "Message received! Turning on the led";
         String alreadyOn = "The led is already on";
         String turnOffMessage = "turn off";
-        String receivedTurnOff = "Message received! Turning off the led";
         String alreadyOff = "The led is already off";
-        String wrongCommand = "There is no such command";
     public:
         String receivedInput;
+        String receivedTurnOn = "Message received! Turning on the led";
+        String receivedTurnOff = "Message received! Turning off the led";
+        String wrongCommand = "There is no such command";
         SerialInterface();
         void setup();
         void waitInput();

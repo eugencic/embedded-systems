@@ -32,13 +32,14 @@ void SerialInterface::takeInput()
 
 bool SerialInterface::changeLight()
 {
+  bool response;
   if (receivedInput == turnOnMessage)
   {
     if (ledState == false)
     {
       ledState = true;
       Serial.println(receivedTurnOn);
-      return true;
+      response = true;
     }
     else
     {
@@ -51,7 +52,7 @@ bool SerialInterface::changeLight()
     {
       ledState = false;
       Serial.println(receivedTurnOff);
-      return false;
+      response = false;
     }
     else
     {
@@ -59,5 +60,8 @@ bool SerialInterface::changeLight()
     }
   }
   else
+  {
     Serial.println(wrongCommand);
+  }
+  return response;
 }
