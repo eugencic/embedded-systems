@@ -58,5 +58,6 @@ bool SerialInterface::changeLight()
       Serial.println(alreadyOff);
     }
   }
-  else Serial.println(wrongCommand);
+  else
+    Serial.println(wrongCommand);
 }

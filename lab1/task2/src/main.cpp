@@ -9,20 +9,20 @@ const int ledPin = 13;
 SerialInterface interface;
 Led led;
 
-void setup() 
+void setup()
 {
   led.setPin(ledPin);
   led.setup();
   interface.setup();
 }
 
-void loop() 
+void loop()
 {
   interface.waitInput();
   delay(64);
   interface.takeInput();
   bool result = interface.changeLight();
-  if (result == true) 
+  if (result == true)
   {
     led.switchLight(true);
   }
