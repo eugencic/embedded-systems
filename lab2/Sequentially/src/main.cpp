@@ -29,6 +29,10 @@ byte blinksPerSecond = 0;
 byte counter = 0;
 
 byte lastGreenLedState = false;
+byte lastGreenLedState2 = false;
+
+static unsigned long lastButton2Time = 0;
+static unsigned long lastButton3Time = 0;
 
 void setup()
 {
@@ -61,11 +65,20 @@ void task1()
     {
       if (greenLedState == true)
       {
-        greenLedState = false;
+        if (blinksPerSecond == 0) 
+        {
+          greenLedState = false;
+          delay(500);
+        }
+        else 
+        {
+          Serial.println("Decrease the frequency to 0 to turn off the green led");
+        }
       }
       else
       {
         greenLedState = true;
+        delay(500);
       }
       greenLed.switchLight(greenLedState);
     }
@@ -74,82 +87,92 @@ void task1()
 
 void task2() 
 {
-  if (greenLedState == false)
+  if (lastGreenLedState != greenLedState)
   {
-    redLed.switchLight(true);
-  }
-  else
-  {
-    redLed.switchLight(false);
+    lastGreenLedState = greenLedState;
+    if (greenLedState == false)
+    {
+      redLed.switchLight(true);
+    }
+    else
+    {
+      redLed.switchLight(false);
+    }
   }
 }
 
 void task3()
 {
   bool button2State = button2.readButton();
-  if (greenLedState == true) {
-    if (button2State != lastButton2State)
+  if (button2State == lastButton2State && (millis() - lastButton2Time) > 50)
+  {
+    lastButton2State = button2State;
+    lastButton2Time = millis();
+    if (button2State == false)
     {
-      lastButton2State = button2State;
-      if (button2State == false)
-      {
-        blinksPerSecond++;
-      }
+      blinksPerSecond++;
     }
   }
 
   bool button3State = button3.readButton();
-  if (greenLedState == true) {
-    if (button3State != lastButton3State)
+  if (button3State == lastButton3State && (millis() - lastButton3Time) > 50)
+  {
+    lastButton3State = button3State;
+    lastButton3Time = millis();
+    if (button3State == false)
     {
-      lastButton3State = button3State;
-      if (button3State == false)
+      if (blinksPerSecond > 0)
       {
-        if (blinksPerSecond > 0)
-        {
-          blinksPerSecond--;
-        }
+        blinksPerSecond--;
+      }
+      else if (blinksPerSecond == 0)
+      {
+        greenLed.switchLight(true);
       }
     }
   }
 
   if (blinksPerSecond > 0)
   {
-    if (greenLedState == true)
-    {
-      int interval = 1000 / blinksPerSecond;
-      greenLed.switchLight(false);
-      delay(interval / 2);
-      greenLed.switchLight(true);
-      delay(interval / 2);
-    }
+    int interval = 1000 / blinksPerSecond;
+    greenLed.switchLight(false);
+    delay(interval / 2);
+    greenLed.switchLight(true);
+    delay(interval / 2);
   }
 }
 
-void task4() {
-  bool button1State = button1.readButton();
-  if (button1State == false && greenLedState == true && lastGreenLedState == false)
+void task4() 
+{
+  if (lastGreenLedState2 != greenLedState)
   {
-      Serial.println("The green led is on");
-      lastGreenLedState = true;
-  } 
-  else if (button1State == false && greenLedState == false && lastGreenLedState == true)
-  {
-      Serial.println("The red led is on");
-      lastGreenLedState = false;
+    lastGreenLedState2 = greenLedState;
+    if (greenLedState == true)
+    {
+      Serial.println("Monitoring leds:");
+      Serial.println("Green led status: on");
+      Serial.println("Red led. Status: off");
+    }
+    else 
+    {
+      Serial.println("Monitoring leds:");
+      Serial.println("Green led status: off");
+      Serial.println("Red led status: on");
+    }
   }
 
-  if (greenLedState == true && counter < blinksPerSecond)
+  if (counter != blinksPerSecond) 
   {
-    Serial.print("Button 2 is pressed. Incrementing the number of blinks per second: ");
-    Serial.println(blinksPerSecond);
-    counter = blinksPerSecond;
-  }
-
-  if (greenLedState == true && counter > blinksPerSecond)
-  {
-    Serial.print("Button 3 is pressed. Decrementing the number of blinks per second: ");
-    Serial.println(blinksPerSecond);
+    if (counter < blinksPerSecond) 
+    {
+      Serial.print("Button 2 is pressed. Incrementing the number of blinks per second: ");
+      Serial.println(blinksPerSecond);
+    }
+    else if (counter > blinksPerSecond) 
+    {
+      Serial.print("Button 3 is pressed. Decrementing the number of blinks per second: ");
+      Serial.println(blinksPerSecond);
+    }
     counter = blinksPerSecond;
   }
 }

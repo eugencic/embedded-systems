@@ -31,10 +31,17 @@ byte blinksPerSecond = 0;
 byte counter = 0;
 
 byte lastGreenLedState = false;
+byte lastGreenLedState2 = false;
 
-void task1(void *parameter)
+static unsigned long lastButton2Time = 0;
+static unsigned long lastButton3Time = 0;
+
+SemaphoreHandle_t greenLedStateMutex;
+
+void task1(void *pvParameters)
 {
-  while (1) {
+  while(1)
+  {
     bool button1State = button1.readButton();
     if (button1State != lastButton1State)
     {
@@ -43,112 +50,134 @@ void task1(void *parameter)
       {
         if (greenLedState == true)
         {
-          greenLedState = false;
+          if (blinksPerSecond == 0)
+          {
+            greenLedState = false;
+          }
+          else
+          {
+            Serial.println("Decrease the frequency to 0 to turn off the green led");
+          }
         }
         else
         {
           greenLedState = true;
         }
+        xSemaphoreTake(greenLedStateMutex, portMAX_DELAY);
         greenLed.switchLight(greenLedState);
+        xSemaphoreGive(greenLedStateMutex);
       }
     }
-    vTaskDelay(1000 / portTICK_PERIOD_MS); // Delay for 1 second
+    vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
 
-void task2(void *parameter)
+void task2(void *pvParameters)
 {
-  while (1) {
-    Serial.println("t2");
-    if (greenLedState == false)
+  while(1)
+  {
+    bool currentGreenLedState = greenLedState;
+    if (lastGreenLedState != currentGreenLedState)
     {
-      redLed.switchLight(true);
-      Serial.println("greenon");
+      lastGreenLedState = currentGreenLedState;
+      if (currentGreenLedState == false)
+      {
+        xSemaphoreTake(greenLedStateMutex, portMAX_DELAY);
+        redLed.switchLight(true);
+        xSemaphoreGive(greenLedStateMutex);
+      }
+      else
+      {
+        xSemaphoreTake(greenLedStateMutex, portMAX_DELAY);
+        redLed.switchLight(false);
+        xSemaphoreGive(greenLedStateMutex);
+      }
     }
-    else
-    {
-      redLed.switchLight(false);
-      Serial.println("greenoff");
-    }
-    vTaskDelay(1000 / portTICK_PERIOD_MS); // Delay for 1 second
+    vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
 
-void task3(void *parameter)
+void task3(void *pvParameters)
 {
-  while (1)
+  while(1)
   {
     bool button2State = button2.readButton();
-    if (greenLedState == true)
+    if (button2State == lastButton2State && (millis() - lastButton2Time) > 50)
     {
-      if (button2State != lastButton2State)
+      lastButton2State = button2State;
+      lastButton2Time = millis();
+      if (button2State == false)
       {
-        lastButton2State = button2State;
-        if (button2State == false)
-        {
-          blinksPerSecond++;
-        }
+        blinksPerSecond++;
       }
     }
 
     bool button3State = button3.readButton();
-    if (greenLedState == true)
+    if (button3State == lastButton3State && (millis() - lastButton3Time) > 50)
     {
-      if (button3State != lastButton3State)
+      lastButton3State = button3State;
+      lastButton3Time = millis();
+      if (button3State == false)
       {
-        lastButton3State = button3State;
-        if (button3State == false)
+        if (blinksPerSecond > 0)
         {
-          if (blinksPerSecond > 0)
-          {
-            blinksPerSecond--;
-          }
+          blinksPerSecond--;
+        }
+        else if (blinksPerSecond == 0)
+        {
+          greenLed.switchLight(true);
         }
       }
     }
 
     if (blinksPerSecond > 0)
     {
-      if (greenLedState == true)
-      {
-        int interval = 1000 / blinksPerSecond;
-        greenLed.switchLight(false);
-        delay(interval / 2);
-        greenLed.switchLight(true);
-        delay(interval / 2);
-      }
+      int interval = 1000 / blinksPerSecond;
+      greenLed.switchLight(false);
+      delay(interval / 2);
+      greenLed.switchLight(true);
+      delay(interval / 2);
     }
+    vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
 
-void task4(void *parameter)
+void task4(void *pvParameters)
 {
-  while (1) {
-    bool button1State = button1.readButton();
-    if (button1State == false && greenLedState == true && lastGreenLedState == false)
+  while(1)
+  {
+    if (lastGreenLedState2 != greenLedState)
     {
-      Serial.println("The green led is on");
-      lastGreenLedState = true;
-    }
-    else if (button1State == false && greenLedState == false && lastGreenLedState == true)
-    {
-      Serial.println("The red led is on");
-      lastGreenLedState = false;
+      lastGreenLedState2 = greenLedState;
+      if (greenLedState == true)
+      {
+        Serial.println("Monitoring leds:");
+        Serial.println("Green led status: on");
+        Serial.println("Red led. Status: off");
+      }
+      else
+      {
+        Serial.println("Monitoring leds:");
+        Serial.println("Green led status: off");
+        Serial.println("Red led status: on");
+      }
     }
 
-    if (greenLedState == true && counter < blinksPerSecond)
+    if (counter != blinksPerSecond)
     {
-      Serial.print("Button 2 is pressed. Incrementing the number of blinks per second: ");
-      Serial.println(blinksPerSecond);
+      if (counter < blinksPerSecond)
+      {
+        Serial.print("Blinks per second: ");
+        Serial.println(blinksPerSecond);
+      }
+      else if (counter > blinksPerSecond)
+      {
+        Serial.print("Blinks per second: ");
+        Serial.println(blinksPerSecond);
+      }
       counter = blinksPerSecond;
     }
-
-    if (greenLedState == true && counter > blinksPerSecond)
-    {
-      Serial.print("Button 3 is pressed. Decrementing the number of blinks per second: ");
-      Serial.println(blinksPerSecond);
-      counter = blinksPerSecond;
-    }
+    vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
 
@@ -156,7 +185,7 @@ void setup()
 {
   button1.setPin(button1Pin);
   button1.setup();
-
+  
   button2.setPin(button2Pin);
   button2.setup();
 
@@ -172,16 +201,14 @@ void setup()
   Serial.begin(9600);
   Serial.println("This is laboratory work nr.2");
 
-  xTaskCreate(task1, "Task 1", 1000, NULL, 1, NULL);
-  xTaskCreate(task2, "Task 2", 1000, NULL, 2, NULL);
-  // xTaskCreate(task3, "Task 3", 1000, NULL, 1, NULL);
-  // xTaskCreate(task4, "Task 4", 1000, NULL, 2, NULL);
+  greenLedStateMutex = xSemaphoreCreateMutex();
+
+  xTaskCreate(task1, "Task 1", 128, NULL, 1, NULL);
+  xTaskCreate(task2, "Task 2", 128, NULL, 2, NULL);
+  xTaskCreate(task3, "Task 3", 128, NULL, 3, NULL);
+  xTaskCreate(task4, "Task 4", 64, NULL, 4, NULL);
 }
 
 void loop()
 {
-  // task1();
-  // task2();
-  // task3();
-  // task4();
-}
+};
