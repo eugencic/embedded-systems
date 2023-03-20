@@ -50,14 +50,7 @@ void task1(void *pvParameters)
       {
         if (greenLedState == true)
         {
-          if (blinksPerSecond == 0)
-          {
-            greenLedState = false;
-          }
-          else
-          {
-            Serial.println("Decrease the frequency to 0 to turn off the green led");
-          }
+          greenLedState = false;
         }
         else
         {
@@ -82,12 +75,14 @@ void task2(void *pvParameters)
       lastGreenLedState = currentGreenLedState;
       if (currentGreenLedState == false)
       {
+        blinksPerSecond = 1;
         xSemaphoreTake(greenLedStateMutex, portMAX_DELAY);
         redLed.switchLight(true);
         xSemaphoreGive(greenLedStateMutex);
       }
-      else
+      else if (currentGreenLedState == true)
       {
+        blinksPerSecond = 0;
         xSemaphoreTake(greenLedStateMutex, portMAX_DELAY);
         redLed.switchLight(false);
         xSemaphoreGive(greenLedStateMutex);
@@ -125,18 +120,18 @@ void task3(void *pvParameters)
         }
         else if (blinksPerSecond == 0)
         {
-          greenLed.switchLight(true);
+          redLed.switchLight(true);
         }
       }
     }
 
     if (blinksPerSecond > 0)
     {
-      int interval = 1000 / blinksPerSecond;
-      greenLed.switchLight(false);
-      delay(interval / 2);
-      greenLed.switchLight(true);
-      delay(interval / 2);
+        int interval = 1000 / blinksPerSecond;
+        redLed.switchLight(false);
+        delay(interval / 2);
+        redLed.switchLight(true);
+        delay(interval / 2);
     }
     vTaskDelay(100 / portTICK_PERIOD_MS);
   }
