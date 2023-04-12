@@ -1,7 +1,8 @@
-# Embedded Systems Laboratory Works
+# Laboratory works of the Embedded Systems university course.
 
-## Laboratory Works
+Performed by: Eugeniu Popa, FAF-202
 
-1. [Laboratory Work #1](https://github.com/eugencic/utm-si/tree/main/lab1)
-2. [Laboratory Work #2](https://github.com/eugencic/utm-si/tree/main/lab2)
-3. [Laboratory Work #3](https://github.com/eugencic/utm-si/tree/main/lab3)
+* [Laboratory Work Nr.1](https://github.com/eugencic/embedded-systems/tree/main/lab1) - User Interaction
+* [Laboratory Work Nr.2](https://github.com/eugencic/embedded-systems/tree/main/lab2) - Operational Systems
+* [Laboratory Work Nr.3](https://github.com/eugencic/embedded-systems/tree/main/lab3) - Sensors
+* [Laboratory Work Nr.4](https://github.com/eugencic/embedded-systems/tree/main/lab4) - Actuators
