@@ -7,3 +7,4 @@ Performed by: Eugeniu Popa, FAF-202
 * [Laboratory Work Nr.3](https://github.com/eugencic/embedded-systems/tree/main/lab3) - Sensors
 * [Laboratory Work Nr.4](https://github.com/eugencic/embedded-systems/tree/main/lab4) - Actuators
 * [Laboratory Work Nr.5](https://github.com/eugencic/embedded-systems/tree/main/lab5) - Control
+* [Laboratory Work Nr.6](https://github.com/eugencic/embedded-systems/tree/main/lab6) - Finite Automata
