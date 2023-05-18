@@ -11,11 +11,15 @@ int elevatorButtons[numElevatorButtons] = {21, 20, 19, 18, 17, 16, 15, 14};
 
 ElevatorFSM elevator(floorButtons, numButtons, elevatorButtons, numElevatorButtons);
 
-const int redPin = 13;
-const int yellowPin = 12;
-const int greenPin = 11;
+const int redPin1 = 13;
+const int yellowPin1 = 12;
+const int greenPin1 = 11;
 
-TrafficLightFSM trafficLight;
+const int redPin2 = 24;
+const int yellowPin2 = 25;
+const int greenPin2 = 26;
+
+TrafficLightFSM* trafficLight = new TrafficLightFSM("GREEN");
 
 void setup()
 {
@@ -30,13 +34,13 @@ void setup()
         pinMode(elevatorButtons[i], INPUT_PULLUP);
     }
 
-    pinMode(redPin, OUTPUT);
-    pinMode(yellowPin, OUTPUT);
-    pinMode(greenPin, OUTPUT);
+    trafficLight->setPins(redPin1, yellowPin1, greenPin1, redPin2, yellowPin2, greenPin2);
+    trafficLight->setup();
+
 }
 
 void loop()
 {
-    elevator.handleState();
-    //trafficLight.handleState();
+    //elevator.handleState();
+    trafficLight->handleState();
 }
